@@ -7,6 +7,8 @@
 #include <ctime>
 #include <iostream>
 
+
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -15,6 +17,10 @@
 #include <GLES2/gl2.h>
 #endif
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
+
+#include "PushButton.h"
+
+
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
@@ -93,8 +99,8 @@ int main(int, char**)
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
+    ImFont* font = io.Fonts->AddFontFromFileTTF("C:\\Users\\casey.kuhns\\Documents\\GitHub\\imguiTestGui\\GraphicalAssets\\pacifico\\pacifico.ttf", 25.0f, NULL);
+    IM_ASSERT(font != NULL);
 
     // Our state
     bool show_demo_window = true;
@@ -178,10 +184,6 @@ int main(int, char**)
 
             char* arrayOfStrings[5] = {"one", "two", "three", "Four", "five"};
 
-            if (progcount == 1) {
-                std::cout << sizeof(arrayOfStrings);
-            }
-
             for (int screen = 0; screen < 4; screen++) {
 
                 char* string = arrayOfStrings[screen];
@@ -210,58 +212,18 @@ int main(int, char**)
         bool buttonClicked = false;
 
 
-        //Let's try to render a button shape....
-        { //Prototype a button render.
-            ImGui::Begin("Button Prototype", &buttonClicked, ImGuiWindowFlags_NoTitleBar);
+        //PUT THE BUTTON HERE DAMNIT
+        PushButton button;
 
-            // Let's taks some window measuremnets and locations
-            const ImVec2 buttonSize = ImGui::GetWindowSize();
-            const ImVec2 buttonPosition = ImGui::GetWindowPos();
+        buttonParameters button1;
+        buttonParameters button2;
 
-            auto buttonWidth = buttonSize.x;
-            auto buttonHeight = buttonSize.y;
+        button1.name = "test 1";
+        button2.name = "test 2";
+        
+        button.init(button1);
+        button.init(button2);
 
-            auto pDrawList = ImGui::GetWindowDrawList(); //Lets pull a list of items to render.  We'll append to this below
-
-            ImColor RED = ImColor(225, 0, 0);
-            ImColor GREEN = ImColor(0, 225, 0);
-            ImColor BLUE = ImColor(0, 0, 255);
-            ImColor YELLOW = ImColor(255, 255, 0);
-            ImColor CYAN = ImColor(0, 255, 255);
-            ImColor MAGNETA = ImColor(255, 0, 255);
-
-            auto buttonStatusColor = ImColor(225, 225, 0);
-
-            
-
-            
-            //AddRect(const ImVec2 & p_min, const ImVec2 & p_max, ImU32 col, float rounding, ImDrawFlags flags, float thickness)
-            if (even == 1) {
-                pDrawList->AddRect(ImVec2(10 + buttonPosition.x , 10 + buttonPosition.y), ImVec2(300 + buttonPosition.x, 300 + buttonPosition.y), RED, 10, 0, 20);
-            }
-            else
-            {
-                pDrawList->AddRect(ImVec2(10 + buttonPosition.x, 10 + buttonPosition.y), ImVec2(300 + buttonPosition.x, 300 + buttonPosition.y), GREEN, 10, 0, 20);
-
-            }
-
-            std::string text = "hello world";
-            
-                
-                auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
-
-                ImGui::SetCursorPosX((buttonWidth - textWidth) * 0.5f);
-                ImGui::Text(text.c_str());
-           
-
-
-            ImGui::End();
-
-
-
-
-
-        }
 
 
 

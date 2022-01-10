@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <imgui.h>
+#include <stdio.h>
+
 
 
 /*
@@ -24,14 +26,21 @@ The (==) indicator displays a color to indicate active or not active
 
 struct buttonParameters {
     
-    char* name; // Unique name of each button NOTE: MUST BE A UNIQUE NAME
+    bool clicked = true;
 
-    ImVec2 position; // Button Position in frame
-    ImVec2 size;     // Total button size
+    char* name = "DefaultButton"; // Unique name of each button NOTE: MUST BE A UNIQUE NAME
 
-    float borderThickness; // Border thickness of the button (NOTE: This will be bound checked to keep image intelligible)
+    ImVec2 position = ImVec2(10.0, 10.0); // Button Position in frame
+    ImVec2 size = ImVec2(60,60); // Total button size
+    ImVec2 buttonBoundSize, textSize, textBoxSize;
 
-    ImVec4 statusTextColor; // Color of status text (
+    float borderWeight = 2; // Border thickness of the button (NOTE: This will be bound checked to keep image intelligible)
+    float alertWeight = 5; // alert boundary
+
+    bool activeState = false;  // Lets default the pushbutton state to inactive or "off" 
+    bool enabledState = true;  // Button press enable, enabled by default.  Useful if you have the switch occupied by other autonomous systems
+
+    ImVec4 statusColor; // Color of status indicator 
 
     const char* stateON   = "ON";
     const char* stateOFF  = "OFF";
@@ -43,12 +52,13 @@ struct buttonParameters {
 class PushButton 
 {
 public:
-	void init(buttonParameters &button);
+	void draw(buttonParameters &b);
 
 private:
     ImVec2 textPos; // Text position in Button
     float textHeight; // Height of font used for text (for resizing buttons)
 
+    void debugWindow(buttonParameters &b);
 };
 
 

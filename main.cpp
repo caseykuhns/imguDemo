@@ -2,25 +2,29 @@
 // (GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
-#include <math.h>
-#include <time.h>
-#include <ctime>
-#include <iostream>
-
-
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <stdio.h>
+
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
 #endif
+
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
+// Include the libs you want to use in the GUI
+#include <math.h>
+#include <time.h>
+#include <ctime>
+#include <iostream>
 #include "PushButton.h"
-
-
+#include "styleHelper.h"
+#include "GraphicalAssets/Fonts/nasaFont.cpp"
+#include <vector>
+#include <string>
+using namespace std;
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
@@ -36,6 +40,8 @@ static void glfw_error_callback(int error, const char* description)
 
 int main(int, char**)
 {
+    printf("Loading....\n");
+
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -66,7 +72,7 @@ int main(int, char**)
 
     // Create window with graphics context
     GLFWwindow* window = glfwCreateWindow(1280, 720, "Generic Control window", NULL, NULL);
-  
+
     if (window == NULL)
         return 1;  //Protect us if we forget to define a window.
 
@@ -86,6 +92,7 @@ int main(int, char**)
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
+    printf("LOADING FONTS\n");
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -99,30 +106,51 @@ int main(int, char**)
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-    ImFont* font = io.Fonts->AddFontFromFileTTF("C:\\Users\\casey.kuhns\\Documents\\GitHub\\imguiTestGui\\GraphicalAssets\\pacifico\\pacifico.ttf", 25.0f, NULL);
+
+    ImFont* font;
+    font = io.Fonts->AddFontFromMemoryCompressedTTF(nasaFont_compressed_data, nasaFont_compressed_size, 14.0f, NULL);
+    if (font == NULL) {
+        printf("defaulting font small\n");
+        font = io.Fonts->AddFontDefault();
+    }
     IM_ASSERT(font != NULL);
+    
+    
+    ImFont* fontlarge;
+    fontlarge = io.Fonts->AddFontFromMemoryCompressedTTF(nasaFont_compressed_data, nasaFont_compressed_size, 25.0f, NULL);
+    if (fontlarge == NULL) {
+        printf("defaulting font large\n");
+        fontlarge = io.Fonts->AddFontDefault();
+    }
+    IM_ASSERT(fontlarge != NULL);
+
 
     // Our state
     bool show_demo_window = true;
-    bool show_another_window = true;
+
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    //ImVec4 clear_color = ImVec4(0.50f, 0.3f, 0.30f, 1.00f); // THIS IS THE BACKGROUND COLOR OF THE GUI
 
 
-    int progcount = 0;  //random counter
-    bool even = 0;
+    int frameCount = 0;  //useful counters
+    int buttonCount = 0;
 
-    int loopCount = 0;
+
+    PushButton button; // Button object class to render pushbutton
+    vector<buttonParameters> buttons; //Lets make a vector of buttons
+    buttons.push_back(buttonParameters());
+    string _name = "Button" + to_string(buttonCount);
+    char* _data = const_cast<char*>(_name.c_str());  //cast our string as a char* so ImGui can name our button. //TODO MAKE A HELPER FUNCTION
+    buttons[buttonCount].name = _data;
+    buttonCount++;
+
+
     // Main loop
+    printf("Begin Rendering\n");
     while (!glfwWindowShouldClose(window))
     {
-        progcount++;  //Count how many times we run through this gives us something to generate data from
-
-        if (loopCount >= 20) {
-            even = !even;
-            loopCount = 0;
-        }
-        loopCount++;
-
+        
+        frameCount++;  //Count how many times we run through this gives us something to generate data from
 
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -136,100 +164,45 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("Tools"))
+            {
+                if (ImGui::MenuItem("Add Button")) {
+                    buttons.push_back(buttonParameters());
+                    _name = ("Button" + to_string(buttonCount));
+                    _data = const_cast<char*>(_name.c_str());  //cast our string as a char* so ImGui can name our button. //TODO MAKE A HELPER FUNCTION
+                    printf("Added Button Named = %s \n", _name.c_str());
+                    buttons[buttonCount].name = _data;                  
+                    buttonCount++;
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Nothing here"))
+            {
+                if (ImGui::MenuItem("For real, nothing")) {}
+                ImGui::Separator();
+                if (ImGui::MenuItem("...still Nothing")) {}
+
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
+
+
+        // Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-            int i = 0;
-            for (i = 0; i < 100; i++) {
-                double a = 10 * sin(i+(progcount/5));
-                ImGui::Text("WHAT AM I DOING = %.1f", a );
-            }
-
-
-            ImGui::End();
+        ImGui::PushFont(fontlarge);
+        for(int i = 0; i < buttonCount; i++ ){
+            _name = "name" + to_string(i);
+            _data = const_cast<char*>(_name.c_str());  //cast our string as a char* so ImGui can name our button. //TODO MAKE A HELPER FUNCTION
+            //buttons[i].name = _data;
+            button.draw(buttons[i]);
         }
 
-
-        {
-            static float foo = 0.0f;
-
-            ImGui::Begin("DOING IT AGAIN");                          // Create a window called "Hello, world!" and append into it.
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::SliderFloat("float", &foo, 0.0f, 4.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::End();
-
-            char* arrayOfStrings[5] = {"one", "two", "three", "Four", "five"};
-
-            for (int screen = 0; screen < 4; screen++) {
-
-                char* string = arrayOfStrings[screen];
-
-              ImGui::Begin(string);                          // Create a window called "Hello, world!" and append into it.
-              ImGui::Text(" text. %f", progcount);               // Display some text (you can use a format strings too)
-              ImGui::End();
-
-            }
-
-
-        }
-
-
-
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
-        }
-
-        bool buttonClicked = false;
-
-
-        //PUT THE BUTTON HERE DAMNIT
-        PushButton button;
-
-        buttonParameters button1;
-        buttonParameters button2;
-
-        button1.name = "test 1";
-        button2.name = "test 2";
-        
-        button.init(button1);
-        button.init(button2);
-
-
-
-
-
-
-
+        ImGui::PopFont();
 
         // Rendering
         ImGui::Render();
